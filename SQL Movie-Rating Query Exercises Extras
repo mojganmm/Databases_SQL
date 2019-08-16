@@ -99,27 +99,43 @@ HAVING COUNT(*) >= 3;
 
 Q9. Some directors directed more than one movie. For all such directors, return the titles of all movies directed by them, along with the director name. Sort by director name, then movie title. (As an extra challenge, try writing the query both with and without COUNT.) 
 
+Using count:
 
+SELECT title, director 
+FROM Movie 
+WHERE director in
+(SELECT director FROM Movie GROUP BY director
+Having COUNT(title)>=2)
+ORDER BY director, title
 
+Without Count:
 
+SELECT m1.title, m1.director 
+FROM Movie m1, Movie m2
+WHERE m2.director=m1.director AND m1.title!=m2.title
+ORDER BY m1.director,m1.title
 
+Q10. Find the movie(s) with the highest average rating. Return the movie title(s) and average rating. (Hint: This query is more difficult to write in SQLite than other systems; you might think of it as finding the highest average rating and then choosing the movie(s) with that average rating.) 
 
+SELECT title, h_avg_rate 
+FROM (SELECT title, AVG(stars) AS h_avg_rate FROM Movie join Rating USING (mID)
+GROUP BY title
+ORDER BY AVG(stars) DESC LIMIT 1)temp
 
+Q11. Find the movie(s) with the lowest average rating. Return the movie title(s) and average rating. (Hint: This query may be more difficult to write in SQLite than other systems; you might think of it as finding the lowest average rating and then choosing the movie(s) with that average rating.) 
 
+SELECT title, AVG(stars) AS low_avg_rating 
+FROM Movie JOIN Rating USING (mID) 
+GROUP BY title
+HAVING AVG(stars)=(SELECT AVG(stars) AS low_avg_rating 
+FROM Movie JOIN Rating USING (mID) 
+GROUP BY title
+ORDER BY AVG(stars)) 
 
+Q12. For each director, return the director's name together with the title(s) of the movie(s) they directed that received the highest rating among all of their movies, and the value of that rating. Ignore movies whose director is NULL. 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+SELECT director, title, stars
+FROM Movie join Rating USING (mID)
+where director is not NULL
+group by director
+having max(stars)
