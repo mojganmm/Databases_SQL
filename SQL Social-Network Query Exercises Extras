@@ -32,3 +32,24 @@ GROUP BY ID1)TMP
 
 Q4: Find the number of students who are either friends with Cassandra or are friends of friends of Cassandra. Do not count Cassandra, even though technically she is a friend of a friend. 
 
+
+select count(*)
+from (select * from friend where id1 = (select id from Highschooler where name = 'Cassandra')) a
+     join
+     (select * from friend) b on a.id2=b.id1
+     
+Q5: Find the name and grade of the student(s) with the greatest number of friends.
+
+
+SELECT name, grade
+FROM Highschooler
+INNER JOIN Friend ON Highschooler.ID = Friend.ID1
+GROUP BY ID1
+HAVING COUNT(*) = (
+  SELECT MAX(count)
+  FROM (
+    SELECT COUNT(*) AS count
+    FROM Friend
+    GROUP BY ID1
+  )
+);
